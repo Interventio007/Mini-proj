@@ -41,7 +41,7 @@ class Window(QtWidgets.QWidget):
         self.window_phone = QtWidgets.QWidget()
 
         self.l_phone_name = QtWidgets.QLabel(self.window_phone)
-        self.l_phone_name.setText("Name")
+        self.l_phone_name.setText("Phone")
         
         self.e_phone_name = QtWidgets.QLineEdit(self.window_phone)
 
@@ -49,9 +49,9 @@ class Window(QtWidgets.QWidget):
 
         self.b_ok_1.move(220,70)
 
-        self.l_phone_name.move(50,40)
+        self.l_phone_name.move(50,35)
 
-        self.e_phone_name.move(100,40)
+        self.e_phone_name.move(100,35)
 
         self.window_phone.setGeometry(500,400,300,100)
 
@@ -67,23 +67,25 @@ class Window(QtWidgets.QWidget):
         self.windows_1 = QtWidgets.QWidget()
 
         self.L1_name = QtWidgets.QLabel(self.windows_1)
-        self.L1_name.setText("Name")
+        self.L1_name.setText("Address")
         
-        self.E1_name = QtWidgets.QLineEdit(self.windows_1)
+        self.E1_name = QtWidgets.QPlainTextEdit(self.windows_1)
 
-        self.b_ok_2 = QtWidgets.QPushButton("OK",self.window_phone)
+        self.b_ok_2 = QtWidgets.QPushButton("OK",self.windows_1)
 
-        self.b_ok_2.move(220,70)
+        self.b_ok_2.move(330,125)
 
         self.L1_name.move(50,40)
 
-        self.E1_name.move(100,40)
+        self.E1_name.move(110,40)
 
-        self.windows_1.setGeometry(500,400,300,100)
+        self.E1_name.resize(300,75)
+
+        self.windows_1.setGeometry(500,400,500,200)
 
         self.windows_1.show()
 
-        self.b_ok_1.clicked.connect(self.ok_click_address)
+        self.b_ok_2.clicked.connect(self.ok_click_address)
 
        
 
@@ -92,13 +94,13 @@ class Window(QtWidgets.QWidget):
 
         self.phone()
 
-        self.window_phone.close()
+        self.windows.close()
 
     def ok_click_phone(self):
 
         self.address()
 
-        self.windows.close()
+        self.window_phone.close()
 
     def ok_click_address(self):
 
@@ -144,7 +146,8 @@ class Window(QtWidgets.QWidget):
         self.e1_phone = QtWidgets.QLineEdit(self.w)
 
         self.e1_name.setText("{0}".format(self.e_name.text()))
-
+        self.e1_phone.setText("{0}".format(self.e_phone_name.text()))
+        
         self.l1_bill.move(50,150)
         self.l1_name.move(50,200)
         self.l1_phone.move(50,250)
@@ -162,7 +165,9 @@ class Window(QtWidgets.QWidget):
 
         self.e2_date = QtWidgets.QLineEdit(self.w)
         self.e2_address = QtWidgets.QPlainTextEdit(self.w)
-    
+
+        self.e2_address.insertPlainText("{0}".format(self.E1_name.toPlainText()))
+
         self.l2_date.setText("Date")
         self.l2_address.setText("Address")
 
@@ -180,10 +185,24 @@ class Window(QtWidgets.QWidget):
 
         self.tableWidget = QTableWidget(self.w)
         self.tableWidget.setRowCount(1)
-        self.tableWidget.setColumnCount(10)
-        self.tableWidget.setSpan(0,0,1,3)
+        self.tableWidget.setColumnCount(12)
         
+        self.tableWidget.horizontalHeader().hide()
+        self.tableWidget.verticalHeader().hide()
+        
+        self.tableWidget.setItem(0,0, QTableWidgetItem("Serial No"))
+        self.tableWidget.setItem(0,1, QTableWidgetItem("Item Code"))
+        self.tableWidget.setItem(0,3, QTableWidgetItem("Product Name"))
+        self.tableWidget.setItem(0,6, QTableWidgetItem("Quantity"))
+        self.tableWidget.setItem(0,7, QTableWidgetItem("Unit Price"))
+        self.tableWidget.setItem(0,8, QTableWidgetItem("GST"))
+        self.tableWidget.setItem(0,9, QTableWidgetItem("Total"))
 
+        self.tableWidget.setSpan(0,1,1,2)
+        self.tableWidget.setSpan(0,3,1,3)
+        self.tableWidget.setSpan(0,9,1,2)
+        
+        
         self.tableWidget.move(50,300)
         self.tableWidget.resize(1325,400)
 
@@ -206,9 +225,7 @@ class Window(QtWidgets.QWidget):
         self.e2_date.setText("{0}/{1}/{2} ".format(day,month,year))
 
         self.w.show()
-        
-        gg = self.name()
-        print(gg)
+
     
     
     
@@ -218,3 +235,4 @@ class Window(QtWidgets.QWidget):
 app = QtWidgets.QApplication(sys.argv)
 window = Window()
 sys.exit(app.exec_())
+
