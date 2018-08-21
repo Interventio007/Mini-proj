@@ -4,6 +4,7 @@ from PyQt5.QtWidgets import QTableWidget,QTableWidgetItem, QPlainTextEdit
 from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import pyqtSlot
 import datetime
+import subprocess
 
 
 class Window(QtWidgets.QWidget):
@@ -30,7 +31,7 @@ class Window(QtWidgets.QWidget):
 
         self.e_name.move(100,35)
 
-        self.windows.setGeometry(500,400,300,100)
+        self.windows.setGeometry(500,400,310,100)
 
         self.windows.show()
 
@@ -53,7 +54,7 @@ class Window(QtWidgets.QWidget):
 
         self.e_phone_name.move(100,35)
 
-        self.window_phone.setGeometry(500,400,300,100)
+        self.window_phone.setGeometry(500,400,310,100)
 
         self.window_phone.show()
 
@@ -112,6 +113,13 @@ class Window(QtWidgets.QWidget):
         
     def initUI(self):
         
+        self.screen = app.primaryScreen()
+        self.size = self.screen.size()
+        self.screen_width = self.size.width()
+        self.screen_height = self.size.height()
+
+        print(self.screen_width)
+        print(self.screen_height)
 
         self.w = QtWidgets.QWidget()
         self.w.setGeometry(0,0,1920,1080)
@@ -152,9 +160,17 @@ class Window(QtWidgets.QWidget):
         self.l1_name.move(50,200)
         self.l1_phone.move(50,250)
 
-        self.e1_bill.move(125,150)
-        self.e1_name.move(125,200)
-        self.e1_phone.move(125,250)
+        if self.screen_width == 1600 and self.screen_height == 900:
+
+            self.e1_bill.move(150,155)
+            self.e1_name.move(150,205)
+            self.e1_phone.move(150,255)
+
+        else:
+
+            self.e1_bill.move(125,150)
+            self.e1_name.move(125,200)
+            self.e1_phone.move(125,250)
 
         self.e1_bill.resize(200,25)
         self.e1_name.resize(200,25)
@@ -176,9 +192,17 @@ class Window(QtWidgets.QWidget):
 
         self.l2_date.move(400,150)
         self.l2_address.move(400,200)
+       
+        if self.screen_width == 1600 and self.screen_height == 900:
+            
+            self.e2_date.move(525,155)
+            self.e2_address.move(525,205)
+       
+        else:
+            
+            self.e2_date.move(500,150)
+            self.e2_address.move(500,200)
 
-        self.e2_date.move(500,150)
-        self.e2_address.move(500,200)
 
         self.e2_date.resize(200,25)
         self.e2_address.resize(300,75)
@@ -217,20 +241,17 @@ class Window(QtWidgets.QWidget):
         self.b_print.resize(100,50)
 
 
-        time = datetime.datetime.now()
-        day = time.day
-        month = time.month
-        year = time.year
+        self.time = datetime.datetime.now()
+        self.day = self.time.day
+        self.month = self.time.month
+        self.year = self.time.year
 
-        self.e2_date.setText("{0}/{1}/{2} ".format(day,month,year))
+        self.e2_date.setText("{0}/{1}/{2} ".format(self.day,self.month,self.year))
 
         self.w.show()
 
     
     
-    
-
-
     
 app = QtWidgets.QApplication(sys.argv)
 window = Window()
