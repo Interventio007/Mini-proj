@@ -1,6 +1,6 @@
 import sys
 from PyQt5 import QtWidgets, QtGui
-from PyQt5.QtWidgets import QTableWidget,QTableWidgetItem, QPlainTextEdit
+from PyQt5.QtWidgets import QTableWidget,QTableWidgetItem, QPlainTextEdit, QDesktopWidget
 from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import pyqtSlot
 import datetime
@@ -19,6 +19,14 @@ class Window(QtWidgets.QWidget):
         self.mainWindow.setGeometry(0,0,1600,900)
         self.mainWindow.setWindowTitle("Time Table")
 
+        self.qtRectangle = self.frameGeometry()
+        self.centerPoint = QDesktopWidget().availableGeometry().center()
+        self.qtRectangle.moveCenter(self.centerPoint)
+        self.move(self.qtRectangle.topLeft())
+
+
+        self.cp = QtWidgets.QDesktopWidget().availableGeometry().center()
+
         self.row_size = int(self.row_entry.text())
         self.column_size = int(self.column_entry.text())
 
@@ -30,6 +38,9 @@ class Window(QtWidgets.QWidget):
         self.tableWidget.verticalHeader().hide()
 
         self.tableWidget.resize(1000,500)
+
+        self.mainWindow.setLayout(self.qtRectangle)
+        
 
         self.mainWindow.show()
     
@@ -52,6 +63,8 @@ class Window(QtWidgets.QWidget):
         self.row_label.move(25,35)
         self.row_entry.move(130,32)
 
+        self.rowWindow.setFixedSize(310,100)
+
         self.rowWindow.show()
 
     
@@ -69,9 +82,11 @@ class Window(QtWidgets.QWidget):
 
         self.column_ok.clicked.connect(self.column_ok_click)
 
-        self.column_ok.move(220,70)
+        self.column_ok.move(250,70)
         self.column_label.move(25,35)
         self.column_entry.move(150,32)
+
+        self.columnWindow.setFixedSize(350,100)
 
         self.columnWindow.show()
 
