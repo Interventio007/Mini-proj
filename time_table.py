@@ -2,7 +2,7 @@ import sys
 from PyQt5 import QtWidgets, QtGui
 from PyQt5.QtWidgets import QTableWidget,QTableWidgetItem, QPlainTextEdit, QDesktopWidget
 from PyQt5.QtGui import QIcon
-from PyQt5.QtCore import pyqtSlot
+from PyQt5.QtCore import pyqtSlot, Qt
 import datetime
 import subprocess
 import mysql.connector
@@ -19,14 +19,6 @@ class Window(QtWidgets.QWidget):
         self.mainWindow.setGeometry(0,0,1600,900)
         self.mainWindow.setWindowTitle("Time Table")
 
-        self.qtRectangle = self.frameGeometry()
-        self.centerPoint = QDesktopWidget().availableGeometry().center()
-        self.qtRectangle.moveCenter(self.centerPoint)
-        self.move(self.qtRectangle.topLeft())
-
-
-        self.cp = QtWidgets.QDesktopWidget().availableGeometry().center()
-
         self.row_size = int(self.row_entry.text())
         self.column_size = int(self.column_entry.text())
 
@@ -37,10 +29,13 @@ class Window(QtWidgets.QWidget):
         self.tableWidget.horizontalHeader().hide()
         self.tableWidget.verticalHeader().hide()
 
-        self.tableWidget.resize(1000,500)
+        self.resolution = QtWidgets.QDesktopWidget().screenGeometry()
 
-        self.mainWindow.setLayout(self.qtRectangle)
-        
+        self.tableWidget.move(,
+                  (self.resolution.height() / 2) - (self.frameSize().height() / 2)) 
+
+
+        self.tableWidget.resize(1000,500)
 
         self.mainWindow.show()
     
