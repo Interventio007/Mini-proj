@@ -30,9 +30,13 @@ class Window(QtWidgets.QWidget):
         self.tableWidget.verticalHeader().hide()
 
         self.resolution = QtWidgets.QDesktopWidget().screenGeometry()
+        self.width = (self.resolution.width() / 2) - 500
+        self.res_width = (self.frameSize().width() / 2) 
 
-        self.tableWidget.move(,
-                  (self.resolution.height() / 2) - (self.frameSize().height() / 2)) 
+        print(self.width)
+        print(self.res_width)
+
+        self.tableWidget.move(self.width , (self.resolution.height() / 2) - (self.frameSize().height() / 2) ) 
 
 
         self.tableWidget.resize(1000,500)
@@ -98,4 +102,4 @@ class Window(QtWidgets.QWidget):
 
 app = QtWidgets.QApplication(sys.argv)
 window = Window()
-sys.exit(app.exec_()) 
+sys.exit(app.exec_())
