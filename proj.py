@@ -1,115 +1,75 @@
 import sys
 from PyQt5 import QtWidgets, QtGui
-from PyQt5.QtWidgets import QTableWidget,QTableWidgetItem, QPlainTextEdit
+from PyQt5.QtWidgets import QTableWidget,QTableWidgetItem, QPlainTextEdit, QDesktopWidget
 from PyQt5.QtGui import QIcon
-from PyQt5.QtCore import pyqtSlot
+from PyQt5.QtCore import pyqtSlot, Qt
 import datetime
 import subprocess
 import mysql.connector
-
 
 class Window(QtWidgets.QWidget):
     
     def __init__(self):
         super().__init__()
+        self.rowcount()
         self.database_create()
-        self.mycursor.execute("use Bill")
-        self.table_show = self.mycursor.execute("Show tables")
-        self.table_check = self.mycursor.fetchone()
-        
-        if self.table_check == None:
-            self.database_table()
-            self.name()
-        else:
-            self.initUI()
-           
         
 
-    def name(self):
+    def initUI(self): 
 
-        self.windows = QtWidgets.QWidget()
+        self.mainWindow = QtWidgets.QWidget()
+        self.mainWindow.setGeometry(0,0,1600,900)
+        self.mainWindow.setWindowTitle("Time Table")
 
-        self.l_name = QtWidgets.QLabel(self.windows)
-        self.l_name.setText("Name")
+        self.row_size = int(self.row_entry.text())
+        self.column_size = int(self.column_entry.text())
+
+        self.tableWidget = QTableWidget(self.mainWindow)
+        self.tableWidget.setRowCount(self.row_size)
+        self.tableWidget.setColumnCount(self.column_size)
+
+        self.save_button = QtWidgets.QPushButton("Save",self.mainWindow)
         
-        self.e_name = QtWidgets.QLineEdit(self.windows)
+        self.tableWidget.horizontalHeader().hide()
+        self.tableWidget.verticalHeader().hide()
 
-        self.b_ok = QtWidgets.QPushButton("OK",self.windows)
+        self.resolution = QtWidgets.QDesktopWidget().screenGeometry()
+        self.width = (self.resolution.width() / 2) - 650
+        self.height = (self.resolution.height() / 2) - 250
 
-        self.b_ok.move(220,70)
-        self.l_name.move(50,35)
-        self.e_name.move(100,35)
+        self.frame_size = self.mainWindow.frameGeometry()
 
-        self.windows.setGeometry(500,400,310,100)
-        self.windows.show()
+        self.tableWidget.move(self.width,self.height ) 
 
-        self.initial_check = True
-        self.b_ok.clicked.connect(self.ok_click)
-
-    def phone(self):
-
-        self.window_phone = QtWidgets.QWidget()
-
-        self.l_phone_name = QtWidgets.QLabel(self.window_phone)
-        self.l_phone_name.setText("Phone")
+        self.tableWidget.setColumnWidth(0,125)
+        self.tableWidget.setColumnWidth(1,125)
+        self.tableWidget.setColumnWidth(2,125)
+        self.tableWidget.setColumnWidth(3,150)
+        self.tableWidget.setColumnWidth(4,125)
+        self.tableWidget.setColumnWidth(5,125)
+        self.tableWidget.setColumnWidth(6,150)
+        self.tableWidget.setColumnWidth(7,125)
+        self.tableWidget.setColumnWidth(8,125)
+        self.tableWidget.setColumnWidth(9,125)
         
-        self.e_phone_name = QtWidgets.QLineEdit(self.window_phone)
-
-        self.b_ok_1 = QtWidgets.QPushButton("OK",self.window_phone)
-
-        self.b_ok_1.move(220,70)
-        self.l_phone_name.move(50,35)
-        self.e_phone_name.move(100,35)
-
-        self.window_phone.setGeometry(500,400,310,100)
-        self.window_phone.show()
-
-        self.b_ok_1.clicked.connect(self.ok_click_phone)
-       
-
-    def address(self):
+        self.tableWidget.setRowHeight(0,50)
+        self.tableWidget.setRowHeight(1,50)
+        self.tableWidget.setRowHeight(2,50)
+        self.tableWidget.setRowHeight(3,50)
+        self.tableWidget.setRowHeight(4,50)
+        self.tableWidget.setRowHeight(5,50)
+        self.tableWidget.setRowHeight(6,50)
+        self.tableWidget.setRowHeight(7,50)
+        self.tableWidget.setRowHeight(8,50)
+        self.tableWidget.setRowHeight(9,50)
         
-        self.windows_1 = QtWidgets.QWidget()
+        self.tableWidget.resize(1302,502)
 
-        self.L1_name = QtWidgets.QLabel(self.windows_1)
-        self.L1_name.setText("Address")
-        
-        self.E1_name = QtWidgets.QPlainTextEdit(self.windows_1)
+        self.save_button.move((self.frame_size.width() - 300),(self.frame_size.height() - 175))
+        self.save_button.resize(75,50)
 
-        self.b_ok_2 = QtWidgets.QPushButton("OK",self.windows_1)
+        self.mainWindow.show()
 
-        self.b_ok_2.move(330,125)
-        self.L1_name.move(50,40)
-        self.E1_name.move(110,40)
-
-        self.E1_name.resize(300,75)
-
-        self.windows_1.setGeometry(500,400,500,200)
-        self.windows_1.show()
-
-        self.b_ok_2.clicked.connect(self.ok_click_address)
-
-       
-    def ok_click(self):
-
-        self.phone()
-
-        self.windows.close()
-
-    def ok_click_phone(self):
-
-        self.address()
-
-        self.window_phone.close()
-
-    def ok_click_address(self):
-
-        self.database_values()
-
-        self.initUI()
-
-        
-        self.windows_1.close()
 
     def database_create(self):
 
@@ -126,183 +86,103 @@ class Window(QtWidgets.QWidget):
         
         for x in self.mycursor:
 
-            if x[0] == 'Bill':
+            if x[0] == 'Time_Table':
                 self.db_exists = True
         
         if self.db_exists == False:
-            self.mycursor.execute("CREATE DATABASE Bill")
+            self.mycursor.execute("CREATE DATABASE Time_Table")
+
+        
+            
 
     def database_table(self):
         
-        self.mycursor.execute("use Bill")
+        self.mycursor.execute("use Time_Table")
         self.mycursor.execute("show tables")
         self.table_exists = False
 
         for a in self.mycursor:
-            if a[0] == 'billDetails':
+            if a[0] == 'Time_Day':
                 self.table_exists = True
         
+        self.rows_size = int(self.row_entry.text())
+        
         if self.table_exists == False:
-            self.mycursor.execute("Create Table billDetails(Name varchar(20),phoneNo varchar(10),address varchar(120),initialcheck varchar(5))")
+            self.mycursor.execute("Create Table Time_Day(column0 Varchar(10))")
+            for i in range(1,self.rows_size):
+                self.mycursor.execute("alter Table Time_Day add column{0} varchar(10)".format(i))
+                
+    
 
-    def database_values(self):
+    def rowcount(self):
 
-        self.shop_name = self.e_name.text()
-        self.shop_phone = int(self.e_phone_name.text())
-        self.shop_address = self.E1_name.toPlainText()
-
-        self.query = "insert into billDetails(Name,phoneNo,address,initialcheck) values(%s,%s,%s,%s)"
-        self.values = (self.shop_name,self.shop_phone,self.shop_address,self.initial_check)
-
-        self.mycursor.execute(self.query,self.values)
-        self.mydb.commit()
-
-    def database_retrieve(self):
-
-        self.mycursor.execute("SELECT * FROM billDetails")
-        self.shop_values_retreived = self.mycursor.fetchone()
+        self.rowWindow = QtWidgets.QWidget()
         
-    def initUI(self):
+        self.resolution = QtWidgets.QDesktopWidget().screenGeometry()
+        self.window_1_width = (self.resolution.width() / 2) - 150
+        self.window_1_height = (self.resolution.height() / 2) - 50
+
+        self.rowWindow.setGeometry(self.window_1_width,self.window_1_height,310,100)
+
+        self.row_label = QtWidgets.QLabel(self.rowWindow)
+        self.row_label.setText("Enter row size")
         
-        self.database_retrieve()
+        self.row_entry = QtWidgets.QLineEdit(self.rowWindow)
 
-        self.screen = app.primaryScreen()
-        self.size = self.screen.size()
-        self.screen_width = self.size.width()
-        self.screen_height = self.size.height()
+        self.row_ok = QtWidgets.QPushButton("OK",self.rowWindow)
 
-        self.w = QtWidgets.QWidget()
-        self.w.setGeometry(0,0,1920,1080)
-        self.w.setWindowTitle("GreenBill")
+        self.row_ok.clicked.connect(self.row_ok_click)
 
-        self.l1_image = QtWidgets.QLabel(self.w)
-        self.l1_title = QtWidgets.QLabel(self.w)
+        self.row_ok.move(220,70)
+        self.row_label.move(25,35)
+        self.row_entry.move(130,32)
 
-        self.l1_image.setPixmap(QtGui.QPixmap("/Users/srinivas/Downloads/gg.png"))
-        self.l1_title.setText("Green Bill")
+        self.rowWindow.setFixedSize(310,100)
 
-        self.setStyleSheet("QtLabel {font: 50pt Roboto}")
-        self.l1_title.setStyleSheet("font: 50pt Roboto")
-          
-        self.l1_image.move(50,25)
-        self.l1_title.move(125,25)
+        self.rowWindow.show()
 
-        self.l1_bill = QtWidgets.QLabel(self.w)
-        self.l1_name = QtWidgets.QLabel(self.w)
-        self.l1_phone = QtWidgets.QLabel(self.w)
-
-        self.l1_bill.setStyleSheet("font: 20pt Roboto")
-        self.l1_name.setStyleSheet("font: 20pt Roboto")
-        self.l1_phone.setStyleSheet("font: 20pt Roboto")
-
-        self.l1_bill.setText("Bill No")
-        self.l1_name.setText("Name")
-        self.l1_phone.setText("Phone")
-
-        self.e1_bill = QtWidgets.QLineEdit(self.w)
-        self.e1_name = QtWidgets.QLineEdit(self.w)
-        self.e1_phone = QtWidgets.QLineEdit(self.w)
-
-        self.e1_name.setText("{0}".format(self.shop_values_retreived[0]))
-        self.e1_phone.setText("{0}".format(self.shop_values_retreived[1]))
-        
-        self.l1_bill.move(50,150)
-        self.l1_name.move(50,200)
-        self.l1_phone.move(50,250)
-
-        if self.screen_width == 1600 and self.screen_height == 900:
-
-            self.e1_bill.move(150,155)
-            self.e1_name.move(150,205)
-            self.e1_phone.move(150,255)
-
-        else:
-
-            self.e1_bill.move(125,150)
-            self.e1_name.move(125,200)
-            self.e1_phone.move(125,250)
-
-        self.e1_bill.resize(200,25)
-        self.e1_name.resize(200,25)
-        self.e1_phone.resize(200,25)
-
-        self.l2_date = QtWidgets.QLabel(self.w)
-        self.l2_address = QtWidgets.QLabel(self.w)
-
-        self.e2_date = QtWidgets.QLineEdit(self.w)
-        self.e2_address = QtWidgets.QPlainTextEdit(self.w)
-
-        self.e2_address.insertPlainText("{0}".format(self.shop_values_retreived[2]))
-
-        self.l2_date.setText("Date")
-        self.l2_address.setText("Address")
-
-        self.l2_date.setStyleSheet("font: 20pt Roboto")
-        self.l2_address.setStyleSheet("font: 20pt Roboto")
-
-        self.l2_date.move(400,150)
-        self.l2_address.move(400,200)
-       
-        if self.screen_width == 1600 and self.screen_height == 900:
-            
-            self.e2_date.move(525,155)
-            self.e2_address.move(525,205)
-       
-        else:
-            
-            self.e2_date.move(500,150)
-            self.e2_address.move(500,200)
-
-
-        self.e2_date.resize(200,25)
-        self.e2_address.resize(300,75)
-
-        self.tableWidget = QTableWidget(self.w)
-        self.tableWidget.setRowCount(1)
-        self.tableWidget.setColumnCount(12)
-        
-        self.tableWidget.horizontalHeader().hide()
-        self.tableWidget.verticalHeader().hide()
-        
-        self.tableWidget.setItem(0,0, QTableWidgetItem("Serial No"))
-        self.tableWidget.setItem(0,1, QTableWidgetItem("Item Code"))
-        self.tableWidget.setItem(0,3, QTableWidgetItem("Product Name"))
-        self.tableWidget.setItem(0,6, QTableWidgetItem("Quantity"))
-        self.tableWidget.setItem(0,7, QTableWidgetItem("Unit Price"))
-        self.tableWidget.setItem(0,8, QTableWidgetItem("GST"))
-        self.tableWidget.setItem(0,9, QTableWidgetItem("Total"))
-
-        self.tableWidget.setSpan(0,1,1,2)
-        self.tableWidget.setSpan(0,3,1,3)
-        self.tableWidget.setSpan(0,9,1,2)
-        
-        
-        self.tableWidget.move(50,300)
-        self.tableWidget.resize(1325,400)
-
-        self.b_save = QtWidgets.QPushButton("Save",self.w)
-        self.b_print = QtWidgets.QPushButton("Print",self.w)
-
-
-        self.b_save.move(1150,725)
-        self.b_print.move(1275,725)
-
-        self.b_save.resize(100,50)
-        self.b_print.resize(100,50)
-
-
-        self.time = datetime.datetime.now()
-        self.day = self.time.day
-        self.month = self.time.month
-        self.year = self.time.year
-
-        self.e2_date.setText("{0}/{1}/{2} ".format(self.day,self.month,self.year))
-
-        self.w.show()
 
     
-    
-    
+    def columncount(self):
+        
+        self.columnWindow = QtWidgets.QWidget()
+        
+        self.resolution = QtWidgets.QDesktopWidget().screenGeometry()
+        self.window_2_width = (self.resolution.width() / 2) - 175
+        self.window_2_height = (self.resolution.height() / 2) - 50
+        
+        self.columnWindow.setGeometry(self.window_2_width,self.window_2_height,350,100)
+
+        self.column_label = QtWidgets.QLabel(self.columnWindow)
+        self.column_label.setText("Enter column size")
+        
+        self.column_entry = QtWidgets.QLineEdit(self.columnWindow)
+
+        self.column_ok = QtWidgets.QPushButton("OK",self.columnWindow)
+
+        self.column_ok.clicked.connect(self.column_ok_click)
+
+        self.column_ok.move(250,70)
+        self.column_label.move(25,35)
+        self.column_entry.move(150,32)
+
+        self.columnWindow.setFixedSize(350,100)
+
+        self.columnWindow.show()
+
+        self.database_table()
+
+    def row_ok_click(self):
+
+        self.columncount()
+        self.rowWindow.close()
+
+    def column_ok_click(self):
+
+        self.initUI()
+        self.columnWindow.close()
+
+
 app = QtWidgets.QApplication(sys.argv)
 window = Window()
-sys.exit(app.exec_()) 
+sys.exit(app.exec_())
