@@ -6,6 +6,7 @@ from PyQt5.QtCore import pyqtSlot, Qt
 import datetime
 import subprocess
 import mysql.connector
+import csv
 
 class Window(QtWidgets.QWidget):
     
@@ -65,8 +66,9 @@ class Window(QtWidgets.QWidget):
         
         self.tableWidget.resize(1302,502)
 
-        self.save_button.move((self.frame_size.width() - 300),(self.frame_size.height() - 175))
+        self.save_button.move((self.frame_size.width() - 500),(self.frame_size.height() - 250))
         self.save_button.resize(75,50)
+        self.save_button.clicked.connect(self.csv_write)
 
         self.mainWindow.show()
 
@@ -76,7 +78,7 @@ class Window(QtWidgets.QWidget):
         self.mydb = mysql.connector.connect(
         host="localhost",
         user="root",
-        passwd="",
+        passwd="sql123$",
         buffered = True
         )
 
@@ -109,7 +111,33 @@ class Window(QtWidgets.QWidget):
         
         if self.table_exists == False:
           pass
-    
+
+    def csv_write(self):
+        
+        row_size = int(self.row_entry.text())
+        col_size = int(self.column_entry.text())
+        
+        with open("/home/cmruuser/output_csv","w") as csv_file:
+            writer = csv.writer(csv_file, delimiter=",")
+            for i in range(0,row_size):
+                for j in range(0,col_size):
+                    
+                    item = self.tableWidget.item(i,j)
+
+                    if(item == None):
+                        writer.writerow(["NULL"])
+
+                    else:
+                        writer.writerow([item.text()])
+
+                   
+     def csv_read(self):
+
+         with open('/home/cmruuser/output_csv', newline='') as csv_file:
+             reader = csv.reader(csv_file, delimiter=',')
+             for i in range(0,row_size):
+                for j in range(0,col_size):
+             
 
     def rowcount(self):
 
