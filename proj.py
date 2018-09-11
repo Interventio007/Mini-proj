@@ -108,10 +108,7 @@ class Window(QtWidgets.QWidget):
         self.rows_size = int(self.row_entry.text())
         
         if self.table_exists == False:
-            self.mycursor.execute("Create Table Time_Day(column0 Varchar(10))")
-            for i in range(1,self.rows_size):
-                self.mycursor.execute("alter Table Time_Day add column{0} varchar(10)".format(i))
-                
+          pass
     
 
     def rowcount(self):
