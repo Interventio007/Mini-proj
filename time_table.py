@@ -6,27 +6,45 @@ from PyQt5.QtCore import pyqtSlot, Qt
 import datetime
 import subprocess
 import mysql.connector
+import csv
 
 class Window(QtWidgets.QWidget):
     
     def __init__(self):
         super().__init__()
-        self.rowcount()
         self.database_create()
-        self.database_table()
+        
+        self.mycursor.execute("USE Time_Table") 
+        self.mycursor.execute("SHOW TABLES")
+        tables = self.mycursor.fetchone() 
+        
+        if tables == None:
+            self.rowcount()
 
-    def initUI(self):
+        else:
+            self.initUI()
+            self.csv_read()
+       
+        
+
+    def initUI(self): 
 
         self.mainWindow = QtWidgets.QWidget()
         self.mainWindow.setGeometry(0,0,1600,900)
         self.mainWindow.setWindowTitle("Time Table")
 
-        self.row_size = int(self.row_entry.text())
-        self.column_size = int(self.column_entry.text())
+        self.mycursor.execute("USE Time_Table") 
+        self.mycursor.execute("Select * from csv_check")
+        tables = self.mycursor.fetchone() 
+
+        self.row_size = int(tables[0])
+        self.column_size = int(tables[1])
 
         self.tableWidget = QTableWidget(self.mainWindow)
         self.tableWidget.setRowCount(self.row_size)
         self.tableWidget.setColumnCount(self.column_size)
+
+        self.save_button = QtWidgets.QPushButton("Save",self.mainWindow)
         
         self.tableWidget.horizontalHeader().hide()
         self.tableWidget.verticalHeader().hide()
@@ -34,6 +52,8 @@ class Window(QtWidgets.QWidget):
         self.resolution = QtWidgets.QDesktopWidget().screenGeometry()
         self.width = (self.resolution.width() / 2) - 650
         self.height = (self.resolution.height() / 2) - 250
+
+        self.frame_size = self.mainWindow.frameGeometry()
 
         self.tableWidget.move(self.width,self.height ) 
 
@@ -61,6 +81,10 @@ class Window(QtWidgets.QWidget):
         
         self.tableWidget.resize(1302,502)
 
+        self.save_button.move((self.frame_size.width() - 500),(self.frame_size.height() - 250))
+        self.save_button.resize(75,50)
+        self.save_button.clicked.connect(self.csv_write)
+
         self.mainWindow.show()
 
 
@@ -69,7 +93,7 @@ class Window(QtWidgets.QWidget):
         self.mydb = mysql.connector.connect(
         host="localhost",
         user="root",
-        passwd="",
+        passwd="sql123$",
         buffered = True
         )
 
@@ -84,6 +108,8 @@ class Window(QtWidgets.QWidget):
         
         if self.db_exists == False:
             self.mycursor.execute("CREATE DATABASE Time_Table")
+
+        
             
 
     def database_table(self):
@@ -93,12 +119,54 @@ class Window(QtWidgets.QWidget):
         self.table_exists = False
 
         for a in self.mycursor:
-            if a[0] == 'Time_Day':
+            if a[0] == 'csv_check':
                 self.table_exists = True
         
         if self.table_exists == False:
-            self.mycursor.execute("Create Table Time_Day(Time Varchar(10), Day Varchar(10))")
-    
+          self.mycursor.execute("create table csv_check(row_value int,col_val int,val_Check tinyint(1))")
+
+    def table_insert(self):
+
+        row_size = int(self.row_entry.text())
+        col_size = int(self.column_entry.text())
+
+        sql = "INSERT INTO csv_check (row_value,col_val,val_check) VALUE (%s,%s,%s)"
+        val =[row_size,col_size,self.csv_check]
+        self.mycursor.execute(sql, val)
+
+        self.mydb.commit()
+
+        
+
+    def csv_write(self):
+        
+        with open("/home/cmruuser/output_csv","w") as csv_file:
+            writer = csv.writer(csv_file, delimiter=",")
+            for i in range(0,self.row_size):
+                for j in range(0,self.column_size):
+                    item = self.tableWidget.item(i,j)
+                    if(item == None):
+                        writer.writerow(["NULL"])
+                    else:
+                        writer.writerow([item.text()])
+
+                   
+    def csv_read(self):
+
+        with open('/home/cmruuser/output_csv', newline='') as csv_file:
+            reader = csv.reader(csv_file, delimiter=',')
+            for val in reader:
+                value = [(','.join(val))] 
+            # for i in range(0,self.row_size):
+            #     for j in range(0,self.column_size):
+            #       for val in reader:
+            #           value = (','.join(val))  
+            #           if (value == "NULL"):
+            #               self.tableWidget.setItem(i, j, QtGui.QTableWidgetItem(""))
+                      
+            #           else:
+            #               self.tableWidget.setItem(i, j, QtGui.QTableWidgetItem(value))
+            print(value)
 
     def rowcount(self):
 
@@ -126,6 +194,7 @@ class Window(QtWidgets.QWidget):
         self.rowWindow.setFixedSize(310,100)
 
         self.rowWindow.show()
+
 
     
     def columncount(self):
@@ -155,6 +224,9 @@ class Window(QtWidgets.QWidget):
 
         self.columnWindow.show()
 
+        self.database_table()
+    
+
     def row_ok_click(self):
 
         self.columncount()
@@ -162,8 +234,12 @@ class Window(QtWidgets.QWidget):
 
     def column_ok_click(self):
 
+        self.csv_check = True
+        self.table_insert()
+
         self.initUI()
         self.columnWindow.close()
+       
 
 
 app = QtWidgets.QApplication(sys.argv)
