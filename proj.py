@@ -7,6 +7,10 @@ import datetime
 import subprocess
 import mysql.connector
 import csv
+import itertools
+
+global count
+count = 0
 
 class Window(QtWidgets.QWidget):
     
@@ -93,7 +97,7 @@ class Window(QtWidgets.QWidget):
         self.mydb = mysql.connector.connect(
         host="localhost",
         user="root",
-        passwd="sql123$",
+        passwd="",
         buffered = True
         )
 
@@ -140,7 +144,7 @@ class Window(QtWidgets.QWidget):
 
     def csv_write(self):
         
-        with open("/home/cmruuser/output_csv","w") as csv_file:
+        with open("/Users/srinivas/output_csv","w") as csv_file:
             writer = csv.writer(csv_file, delimiter=",")
             for i in range(0,self.row_size):
                 for j in range(0,self.column_size):
@@ -153,17 +157,27 @@ class Window(QtWidgets.QWidget):
                    
     def csv_read(self):
 
-        with open('/home/cmruuser/output_csv', newline='') as csv_file:
+    
+        with open('/Users/srinivas/output_csv', newline='') as csv_file:
             reader = csv.reader(csv_file, delimiter=',')
+            value =[]
+            for val in reader:
+                value.append(val)
             for i in range(0,self.row_size):
-                for j in range(0,self.column_size):
-                  for val in reader:
-                      value = (','.join(val))  
-                      if (value == "NULL"):
-                          self.tableWidget.setItem(i, j, QtGui.QTableWidgetItem(""))
+                for j in range(0,self.column_size): 
                       
-                      else:
-                          self.tableWidget.setItem(i, j, QtGui.QTableWidgetItem(value))
+                    global count
+                    if (value[count] == "NULL"):
+                        self.tableWidget.setItem(i, j, QTableWidgetItem(""))
+                      
+                    else:
+                        gg = next(iter(value[count]))
+                        self.tableWidget.setItem(i, j, QTableWidgetItem(gg))
+
+                    count+=1
+        
+
+            
 
     def rowcount(self):
 
