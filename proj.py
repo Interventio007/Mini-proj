@@ -8,6 +8,7 @@ import subprocess
 import mysql.connector
 import csv
 import itertools
+import os
 
 global count
 count = 0
@@ -28,6 +29,7 @@ class Window(QtWidgets.QWidget):
         else:
             self.initUI()
             self.csv_read()
+            
        
         
 
@@ -102,10 +104,10 @@ class Window(QtWidgets.QWidget):
 
         self.drp_box_lbl.move((self.frame_size.width() - 1525),(self.frame_size.height() - 760))
         self.drop_box.move((self.frame_size.width() - 1450),(self.frame_size.height() - 800))
-        self.drop_box.resize(200,100)
+        self.drop_box.resize(150,25)
         
         
-        self.save_button.move((self.frame_size.width() - 300),(self.frame_size.height() - 175))
+        self.save_button.move((self.frame_size.width() - 600),(self.frame_size.height() - 375))
         self.save_button.resize(75,50)
         self.save_button.clicked.connect(self.csv_write)
 
@@ -113,7 +115,9 @@ class Window(QtWidgets.QWidget):
 
     def onActivated(self, text):
        
-        print(text)
+        self.semester_value = text
+        print(self.semester_value)
+        self.csv_read()
          
         
                 
@@ -124,7 +128,7 @@ class Window(QtWidgets.QWidget):
         self.mydb = mysql.connector.connect(
         host="localhost",
         user="root",
-        passwd="",
+        passwd="sql123$",
         buffered = True
         )
 
@@ -154,15 +158,15 @@ class Window(QtWidgets.QWidget):
                 self.table_exists = True
         
         if self.table_exists == False:
-          self.mycursor.execute("create table csv_check(row_value int,col_val int,val_Check tinyint(1))")
+          self.mycursor.execute("create table csv_check(row_value int,col_val int,init_sem_value int)")
 
     def table_insert(self):
 
         row_size = int(self.row_entry.text())
         col_size = int(self.column_entry.text())
 
-        sql = "INSERT INTO csv_check (row_value,col_val,val_check) VALUE (%s,%s,%s)"
-        val =[row_size,col_size,self.csv_check]
+        sql = "INSERT INTO csv_check (row_value,col_val,init_sem_value) VALUES(%s,%s,%s)"
+        val =[row_size,col_size,1]
         self.mycursor.execute(sql, val)
 
         self.mydb.commit()
@@ -170,8 +174,15 @@ class Window(QtWidgets.QWidget):
         
 
     def csv_write(self):
-        
-        with open("/Users/srinivas/output_csv","w") as csv_file:
+
+        try:
+            file_end = self.semester_value[-1]
+        except NameError:
+            file_end = 1
+
+            
+       
+        with open("/home/cmruuser/output_csv_{0}".format(file_end),"w") as csv_file:
             writer = csv.writer(csv_file, delimiter=",")
             for i in range(0,self.row_size):
                 for j in range(0,self.column_size):
@@ -184,24 +195,35 @@ class Window(QtWidgets.QWidget):
                    
     def csv_read(self):
 
-    
-        with open('/Users/srinivas/output_csv', newline='') as csv_file:
-            reader = csv.reader(csv_file, delimiter=',')
-            value =[]
-            for val in reader:
-                value.append(val)
-            for i in range(0,self.row_size):
-                for j in range(0,self.column_size): 
-                      
-                    global count
-                    if (value[count] == "NULL"):
-                        self.tableWidget.setItem(i, j, QTableWidgetItem(""))
-                      
-                    else:
-                        gg = next(iter(value[count]))
-                        self.tableWidget.setItem(i, j, QTableWidgetItem(gg))
+        try:
+            file_end = self.semester_value[-1]
+        except NameError:
+            file_end = 1
 
-                    count+=1
+        exists = os.path.isfile('/home/cmruuser/output_csv_{0}'.format(1))
+        if exists:
+
+            with open('/Users/srinivas/output_csv_{0}'.format(1), newline='') as csv_file:
+                reader = csv.reader(csv_file, delimiter=',')
+                value =[]
+                for val in reader:
+                    value.append(val)
+                for i in range(0,self.row_size):
+                    for j in range(0,self.column_size): 
+                      
+                        global count
+                        if (next(iter(value[count] == "NULL"))):
+                            self.tableWidget.setItem(i, j, QTableWidgetItem(""))
+                      
+                        else:
+                            gg = next(iter(value[count]))
+                            self.tableWidget.setItem(i, j, QTableWidgetItem(gg))
+
+                        count+=1
+        
+        else:
+
+            self.initUI()
         
 
             
