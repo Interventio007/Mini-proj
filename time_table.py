@@ -1,12 +1,16 @@
 import sys
 from PyQt5 import QtWidgets, QtGui
-from PyQt5.QtWidgets import QTableWidget,QTableWidgetItem, QPlainTextEdit, QDesktopWidget
-from PyQt5.QtGui import QIcon
-from PyQt5.QtCore import pyqtSlot, Qt
+from PyQt5.QtWidgets import QTableWidget,QTableWidgetItem, QPlainTextEdit, QDesktopWidget, QComboBox
+from PyQt5.QtGui import QIcon 
+from PyQt5.QtCore import pyqtSlot
 import datetime
 import subprocess
 import mysql.connector
 import csv
+import itertools
+
+global count
+count = 0
 
 class Window(QtWidgets.QWidget):
     
@@ -18,9 +22,10 @@ class Window(QtWidgets.QWidget):
         self.mycursor.execute("SHOW TABLES")
         tables = self.mycursor.fetchone() 
         
+        #checking if tables exists 
         if tables == None:
             self.rowcount()
-
+        #if not exists call the create database func
         else:
             self.initUI()
             self.csv_read()
@@ -32,7 +37,8 @@ class Window(QtWidgets.QWidget):
         self.mainWindow = QtWidgets.QWidget()
         self.mainWindow.setGeometry(0,0,1600,900)
         self.mainWindow.setWindowTitle("Time Table")
-
+        
+        #retreiving table rows and columns    
         self.mycursor.execute("USE Time_Table") 
         self.mycursor.execute("Select * from csv_check")
         tables = self.mycursor.fetchone() 
@@ -40,9 +46,25 @@ class Window(QtWidgets.QWidget):
         self.row_size = int(tables[0])
         self.column_size = int(tables[1])
 
+        #creating a table using Qtablewidget
         self.tableWidget = QTableWidget(self.mainWindow)
         self.tableWidget.setRowCount(self.row_size)
         self.tableWidget.setColumnCount(self.column_size)
+        
+        self.drp_box_lbl = QtWidgets.QLabel(self.mainWindow)
+        self.drp_box_lbl.setText("Semester:")
+        self.drop_box = QComboBox(self.mainWindow)
+
+        self.drop_box.addItem("Semester 1")
+        self.drop_box.addItem("Semester 2")
+        self.drop_box.addItem("Semester 3")
+        self.drop_box.addItem("Semester 4")
+        self.drop_box.addItem("Semester 5")
+        self.drop_box.addItem("Semester 6")
+        self.drop_box.addItem("Semester 7")
+        self.drop_box.addItem("Semester 8")
+
+        self.drop_box.activated[str].connect(self.onActivated)
 
         self.save_button = QtWidgets.QPushButton("Save",self.mainWindow)
         
@@ -56,7 +78,8 @@ class Window(QtWidgets.QWidget):
         self.frame_size = self.mainWindow.frameGeometry()
 
         self.tableWidget.move(self.width,self.height ) 
-
+        
+        #setting row and columns size
         self.tableWidget.setColumnWidth(0,125)
         self.tableWidget.setColumnWidth(1,125)
         self.tableWidget.setColumnWidth(2,125)
@@ -80,20 +103,34 @@ class Window(QtWidgets.QWidget):
         self.tableWidget.setRowHeight(9,50)
         
         self.tableWidget.resize(1302,502)
-
-        self.save_button.move((self.frame_size.width() - 500),(self.frame_size.height() - 250))
+        
+        #calculating the table and frame size and posisitoning table based on these values
+        self.drp_box_lbl.move((self.frame_size.width() - 1525),(self.frame_size.height() - 760))
+        self.drop_box.move((self.frame_size.width() - 1450),(self.frame_size.height() - 800))
+        self.drop_box.resize(200,100)
+        
+        
+        self.save_button.move((self.frame_size.width() - 300),(self.frame_size.height() - 175))
         self.save_button.resize(75,50)
         self.save_button.clicked.connect(self.csv_write)
 
         self.mainWindow.show()
 
+    def onActivated(self, text):
+       
+        print(text)
+         
+        
+                
+
 
     def database_create(self):
 
+        # linking database
         self.mydb = mysql.connector.connect(
         host="localhost",
         user="root",
-        passwd="sql123$",
+        passwd="",
         buffered = True
         )
 
@@ -101,6 +138,7 @@ class Window(QtWidgets.QWidget):
         self.mycursor.execute("SHOW DATABASES")
         self.db_exists = False
         
+        #checking if database exists if not create
         for x in self.mycursor:
 
             if x[0] == 'Time_Table':
@@ -114,10 +152,12 @@ class Window(QtWidgets.QWidget):
 
     def database_table(self):
         
+        #creating  a table
         self.mycursor.execute("use Time_Table")
         self.mycursor.execute("show tables")
         self.table_exists = False
 
+        #checking if the table we want exists if not then create
         for a in self.mycursor:
             if a[0] == 'csv_check':
                 self.table_exists = True
@@ -126,7 +166,8 @@ class Window(QtWidgets.QWidget):
           self.mycursor.execute("create table csv_check(row_value int,col_val int,val_Check tinyint(1))")
 
     def table_insert(self):
-
+        
+        #inserting the row,column and default file values
         row_size = int(self.row_entry.text())
         col_size = int(self.column_entry.text())
 
@@ -140,7 +181,8 @@ class Window(QtWidgets.QWidget):
 
     def csv_write(self):
         
-        with open("/home/cmruuser/output_csv","w") as csv_file:
+        #writing the contents of the table to a file based on semester
+        with open("/Users/srinivas/output_csv","w") as csv_file:
             writer = csv.writer(csv_file, delimiter=",")
             for i in range(0,self.row_size):
                 for j in range(0,self.column_size):
@@ -153,23 +195,31 @@ class Window(QtWidgets.QWidget):
                    
     def csv_read(self):
 
-        with open('/home/cmruuser/output_csv', newline='') as csv_file:
+        #reading the semester specfic files 
+        with open('/Users/srinivas/output_csv', newline='') as csv_file:
             reader = csv.reader(csv_file, delimiter=',')
+            value =[]
             for val in reader:
-                value = [(','.join(val))] 
-            # for i in range(0,self.row_size):
-            #     for j in range(0,self.column_size):
-            #       for val in reader:
-            #           value = (','.join(val))  
-            #           if (value == "NULL"):
-            #               self.tableWidget.setItem(i, j, QtGui.QTableWidgetItem(""))
+                value.append(val)
+            for i in range(0,self.row_size):
+                for j in range(0,self.column_size): 
                       
-            #           else:
-            #               self.tableWidget.setItem(i, j, QtGui.QTableWidgetItem(value))
-            print(value)
+                    global count
+                    if (next(iter(value[count])) == "NULL"):
+                        self.tableWidget.setItem(i, j, QTableWidgetItem(""))
+                      
+                    else:
+                        gg = next(iter(value[count]))
+                        self.tableWidget.setItem(i, j, QTableWidgetItem(gg))
+
+                    count+=1
+        
+
+            
 
     def rowcount(self):
-
+        
+        #getting user input from the user for rows
         self.rowWindow = QtWidgets.QWidget()
         
         self.resolution = QtWidgets.QDesktopWidget().screenGeometry()
@@ -199,6 +249,7 @@ class Window(QtWidgets.QWidget):
     
     def columncount(self):
         
+        #getting user input for column size
         self.columnWindow = QtWidgets.QWidget()
         
         self.resolution = QtWidgets.QDesktopWidget().screenGeometry()
@@ -228,12 +279,14 @@ class Window(QtWidgets.QWidget):
     
 
     def row_ok_click(self):
-
+        
+        #closing row windows and opening column window
         self.columncount()
         self.rowWindow.close()
 
     def column_ok_click(self):
 
+        #closing col windows and opening main window
         self.csv_check = True
         self.table_insert()
 
