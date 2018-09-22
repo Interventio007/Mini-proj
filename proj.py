@@ -102,12 +102,12 @@ class Window(QtWidgets.QWidget):
         
         self.tableWidget.resize(1302,502)
 
-        self.drp_box_lbl.move((self.frame_size.width() - 1525),(self.frame_size.height() - 760))
+        self.drp_box_lbl.move((self.frame_size.width() - 1525),(self.frame_size.height() - 800))
         self.drop_box.move((self.frame_size.width() - 1450),(self.frame_size.height() - 800))
         self.drop_box.resize(150,25)
         
         
-        self.save_button.move((self.frame_size.width() - 600),(self.frame_size.height() - 375))
+        self.save_button.move((self.frame_size.width() - 300),(self.frame_size.height() - 175))
         self.save_button.resize(75,50)
         self.save_button.clicked.connect(self.csv_write)
 
@@ -128,7 +128,7 @@ class Window(QtWidgets.QWidget):
         self.mydb = mysql.connector.connect(
         host="localhost",
         user="root",
-        passwd="sql123$",
+        passwd="",
         buffered = True
         )
 
@@ -176,13 +176,13 @@ class Window(QtWidgets.QWidget):
     def csv_write(self):
 
         try:
-            file_end = self.semester_value[-1]
-        except NameError:
-            file_end = 1
+            self.file_end = self.semester_value[-1]
+        except AttributeError:
+            self.file_end = 1
 
             
        
-        with open("/home/cmruuser/output_csv_{0}".format(file_end),"w") as csv_file:
+        with open("/Users/srinivas/output_csv_{0}".format(self.file_end),"w") as csv_file:
             writer = csv.writer(csv_file, delimiter=",")
             for i in range(0,self.row_size):
                 for j in range(0,self.column_size):
@@ -196,14 +196,14 @@ class Window(QtWidgets.QWidget):
     def csv_read(self):
 
         try:
-            file_end = self.semester_value[-1]
-        except NameError:
-            file_end = 1
+            self.file_end = self.semester_value[-1]
+        except AttributeError:
+            self.file_end = 1
 
-        exists = os.path.isfile('/home/cmruuser/output_csv_{0}'.format(1))
+        exists = os.path.isfile('/Users/srinivas/output_csv_{0}'.format(self.file_end))
         if exists:
 
-            with open('/Users/srinivas/output_csv_{0}'.format(1), newline='') as csv_file:
+            with open('/Users/srinivas/output_csv_{0}'.format(self.file_end), newline='') as csv_file:
                 reader = csv.reader(csv_file, delimiter=',')
                 value =[]
                 for val in reader:
@@ -212,7 +212,7 @@ class Window(QtWidgets.QWidget):
                     for j in range(0,self.column_size): 
                       
                         global count
-                        if (next(iter(value[count] == "NULL"))):
+                        if (next(iter(value[count])) == "NULL"):
                             self.tableWidget.setItem(i, j, QTableWidgetItem(""))
                       
                         else:
