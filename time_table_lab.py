@@ -111,6 +111,30 @@ class Window(QtWidgets.QWidget):
         self.save_button.resize(75,50)
         self.save_button.clicked.connect(self.csv_write)
 
+        if self.frame_size.width() < 1440:
+
+            self.tableWidget.setColumnWidth(0,100)
+            self.tableWidget.setColumnWidth(1,100)
+            self.tableWidget.setColumnWidth(2,100)
+            self.tableWidget.setColumnWidth(3,125)
+            self.tableWidget.setColumnWidth(4,100)
+            self.tableWidget.setColumnWidth(5,100)
+            self.tableWidget.setCseolumnWidth(6,125)
+            self.tableWidget.setColumnWidth(7,100)
+            self.tableWidget.setColumnWidth(8,100)
+            self.tableWidget.setColumnWidth(9,100)
+
+            self.tableWidget.resize(1002,202)
+
+            self.drp_box_lbl.move((self.frame_size.width() - 1225),(self.frame_size.height() - 800))
+            self.drop_box.move((self.frame_size.width() - 1150),(self.frame_size.height() - 800))
+            self.drop_box.resize(150,25)
+        
+        
+            self.save_button.move((self.frame_size.width() - 100),(self.frame_size.height() - 175))
+            self.save_button.resize(75,50)
+            self.save_buttgfon.clicked.connect(self.csv_write)
+
         self.mainWindow.show()
 
     def onActivated(self, text):
