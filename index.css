@@ -30,22 +30,53 @@ margin : 0px;
 
 #Input_Main{
     margin-top: 20px;
-    height: 350px;
-    background-color: blue;
+    height: 650px;
+    /* background-color: blue; */
 }
 
 #Left_Input{
-    margin-top: 10px;
-    height: 330px;
-    background-color: aqua;
+    margin-top: 25px;
+    height: 600px;
+    /* background-color: aqua; */
     float: left;
 }
 
 #Right_Input{
-    margin-top: 10px;
-    height: 330px;
-    background-color: brown;
+    margin-top: 25px;
+    height: 600px;
+    /* background-color: brown; */
     float: left;
+}
+
+.Test{
+    height: 75px;
+    
+}
+
+.Test p{
+
+    margin-top: 20px;
+    float: left 
+    
+    
+}
+
+.right_inputs{
+    height: 75px;
+
+}
+
+.right_inputs p{
+    margin-top: 20px;
+    float: left;
+}
+
+input.form-control{
+
+    margin-left: 20px;
+    margin-top: 15px;
+    width: 300px;
+    float:left;
 }
 
 
