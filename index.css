@@ -1,0 +1,51 @@
+*{
+padding: 0px;
+margin : 0px;
+}
+
+#heading_container{
+/* background-color: grey; */
+
+}
+
+#heading_container h1{
+    font-size: 30px;
+    text-align: center
+}
+
+#Slot_container_main{
+    margin-top: 20px;
+    /* background-color: blue; */
+    height:500px;
+}
+
+#Slots_per_day{
+    /* background-color: cyan; */
+    height: 50px;
+}
+
+#Slots_input{
+    width: 700px;
+}
+
+#Input_Main{
+    margin-top: 20px;
+    height: 350px;
+    background-color: blue;
+}
+
+#Left_Input{
+    margin-top: 10px;
+    height: 330px;
+    background-color: aqua;
+    float: left;
+}
+
+#Right_Input{
+    margin-top: 10px;
+    height: 330px;
+    background-color: brown;
+    float: left;
+}
+
+
