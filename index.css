@@ -30,36 +30,51 @@ margin : 0px;
 
 #Input_Main{
     margin-top: 20px;
-    height: 650px;
+    height: 575px;
     /* background-color: blue; */
 }
 
 #Left_Input{
     margin-top: 25px;
-    height: 600px;
+    height: 500px;
     /* background-color: aqua; */
     float: left;
 }
 
 #Right_Input{
     margin-top: 25px;
-    height: 600px;
+    height: 500px;
     /* background-color: brown; */
     float: left;
 }
 
-.Test{
+#Left_Input .container{
     height: 75px;
-    
+    /* background-color: black; */
 }
 
-.Test p{
+#Left_Input .container p{
 
     margin-top: 20px;
-    float: left 
+    float: left ;
     
     
 }
+
+
+#Right_Input .container{
+    height: 75px;
+    /* background-color:gray; */
+}
+
+#Right_Input .container p{
+
+    margin-top: 20px;
+    float: left ;
+    
+    
+}
+
 
 .right_inputs{
     height: 75px;
@@ -79,4 +94,9 @@ input.form-control{
     float:left;
 }
 
+.break{
+
+    height: 100px;
+    background-color: black;
+}
 
