@@ -94,9 +94,48 @@ input.form-control{
     float:left;
 }
 
-.break{
+.break .container-fluid{
 
     height: 100px;
-    background-color: black;
+    /*background-color: red;*/
+    
 }
 
+#left_break{
+	float: left;
+	height: 100px;
+	/*background-color: black;*/
+}
+
+#right_break{
+	float: left;
+	height: 100px;
+	/*background-color: blue;*/
+}
+
+#left_break *{
+	float: left;
+}
+
+#right_break *{
+	float: left;
+}
+
+#left_break p {
+	margin-top: 25px;
+}
+
+#right_break p {
+	margin-top: 25px;
+}
+
+.footer{
+	height:75px;
+	/*background-color: black;*/
+}
+
+#noob{
+	float: right;
+	height: 75px;
+	/*background-color: green;*/
+}
