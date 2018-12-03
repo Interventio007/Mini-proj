@@ -1,7 +1,7 @@
 import sys
-from PyQt5 import QtWidgets, QtGui
-from PyQt5.QtWidgets import QTableWidget,QTableWidgetItem, QPlainTextEdit, QDesktopWidget, QComboBox
-from PyQt5.QtGui import QIcon 
+from PyQt5 import QtWidgets, QtGui, QtCore, uic
+from PyQt5.QtWidgets import QTableWidget, QTableWidgetItem, QPlainTextEdit, QDesktopWidget, QComboBox
+from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import pyqtSlot
 import datetime
 import subprocess
@@ -9,39 +9,45 @@ import mysql.connector
 import csv
 import itertools
 import os
+import random
 
 global count
 count = 0
 
+CS = [[], [], [], [], []]
+CS2 = [[], [], [], [], []]
+global cultsub
+cultsub = 0
+
+table_check = False
+
 class Window(QtWidgets.QWidget):
-    
+
     def __init__(self):
         super().__init__()
         self.database_create()
-        
-        self.mycursor.execute("USE Time_Table") 
+
+        self.mycursor.execute("USE Time_Table")
         self.mycursor.execute("SHOW TABLES")
-        tables = self.mycursor.fetchone() 
-        
+        tables = self.mycursor.fetchone()
+
         if tables == None:
             self.rowcount()
 
         else:
+            self.cs()
             self.initUI()
             self.csv_read()
-            
-       
-        
 
-    def initUI(self): 
+    def initUI(self):
 
         self.mainWindow = QtWidgets.QWidget()
-        self.mainWindow.setGeometry(0,0,1600,900)
+        self.mainWindow.setGeometry(0, 0, 1600, 900)
         self.mainWindow.setWindowTitle("Time Table")
 
-        self.mycursor.execute("USE Time_Table") 
+        self.mycursor.execute("USE Time_Table")
         self.mycursor.execute("Select * from csv_check")
-        tables = self.mycursor.fetchone() 
+        tables = self.mycursor.fetchone()
 
         self.row_size = int(tables[0])
         self.column_size = int(tables[1])
@@ -65,8 +71,8 @@ class Window(QtWidgets.QWidget):
 
         self.drop_box.activated[str].connect(self.onActivated)
 
-        self.save_button = QtWidgets.QPushButton("Save",self.mainWindow)
-        
+        self.save_button = QtWidgets.QPushButton("Save", self.mainWindow)
+
         self.tableWidget.horizontalHeader().hide()
         self.tableWidget.verticalHeader().hide()
 
@@ -76,79 +82,86 @@ class Window(QtWidgets.QWidget):
 
         self.frame_size = self.mainWindow.frameGeometry()
 
-        self.tableWidget.move(self.width,self.height ) 
+        self.tableWidget.move(self.width, self.height)
 
-        self.tableWidget.setColumnWidth(0,125)
-        self.tableWidget.setColumnWidth(1,125)
-        self.tableWidget.setColumnWidth(2,125)
-        self.tableWidget.setColumnWidth(3,150)
-        self.tableWidget.setColumnWidth(4,125)
-        self.tableWidget.setColumnWidth(5,125)
-        self.tableWidget.setColumnWidth(6,150)
-        self.tableWidget.setColumnWidth(7,125)
-        self.tableWidget.setColumnWidth(8,125)
-        self.tableWidget.setColumnWidth(9,125)
-        
-        self.tableWidget.setRowHeight(0,50)
-        self.tableWidget.setRowHeight(1,50)
-        self.tableWidget.setRowHeight(2,50)
-        self.tableWidget.setRowHeight(3,50)
-        self.tableWidget.setRowHeight(4,50)
-        self.tableWidget.setRowHeight(5,50)
-        self.tableWidget.setRowHeight(6,50)
-        self.tableWidget.setRowHeight(7,50)
-        self.tableWidget.setRowHeight(8,50)
-        self.tableWidget.setRowHeight(9,50)
-        
-        self.tableWidget.resize(1302,502)
+        self.tableWidget.setColumnWidth(0, 125)
+        self.tableWidget.setColumnWidth(1, 125)
+        self.tableWidget.setColumnWidth(2, 125)
+        self.tableWidget.setColumnWidth(3, 150)
+        self.tableWidget.setColumnWidth(4, 125)
+        self.tableWidget.setColumnWidth(5, 125)
+        self.tableWidget.setColumnWidth(6, 150)
+        self.tableWidget.setColumnWidth(7, 125)
+        self.tableWidget.setColumnWidth(8, 125)
+        self.tableWidget.setColumnWidth(9, 125)
 
-        self.drp_box_lbl.move((self.frame_size.width() - 1525),(self.frame_size.height() - 800))
-        self.drop_box.move((self.frame_size.width() - 1450),(self.frame_size.height() - 800))
-        self.drop_box.resize(150,25)
-        
-        
-        self.save_button.move((self.frame_size.width() - 300),(self.frame_size.height() - 175))
-        self.save_button.resize(75,50)
+        self.tableWidget.setRowHeight(0, 50)
+        self.tableWidget.setRowHeight(1, 50)
+        self.tableWidget.setRowHeight(2, 50)
+        self.tableWidget.setRowHeight(3, 50)
+        self.tableWidget.setRowHeight(4, 50)
+        self.tableWidget.setRowHeight(5, 50)
+        self.tableWidget.setRowHeight(6, 50)
+        self.tableWidget.setRowHeight(7, 50)
+        self.tableWidget.setRowHeight(8, 50)
+        self.tableWidget.setRowHeight(9, 50)
+
+        self.tableWidget.resize(1302, 502)
+
+        self.drp_box_lbl.move((self.frame_size.width() - 1525), (self.frame_size.height() - 800))
+        self.drop_box.move((self.frame_size.width() - 1450), (self.frame_size.height() - 800))
+        self.drop_box.resize(150, 25)
+
+        self.save_button.move((self.frame_size.width() - 300), (self.frame_size.height() - 175))
+        self.save_button.resize(75, 50)
         self.save_button.clicked.connect(self.csv_write)
+
+        gg = self.cs()
+
+        # for i in range(0, self.row_size):
+        #     for j in range(0, self.column_size):
+
+        #         global count
+        #         if (next(iter(gg[i][j])) == "NULL"):
+        #             self.tableWidget.setItem(i, j, QTableWidgetItem(""))
+
+        #         else:
+        #             ggs= next(iter(gg[i][j]))
+        #             self.tableWidget.setItem(i, j, QTableWidgetItem(gg))
+
+        #         count += 1
 
         self.mainWindow.show()
 
     def onActivated(self, text):
-       
+
         self.semester_value = text
         print(self.semester_value)
         self.csv_read()
-         
-        
-                
-
 
     def database_create(self):
 
         self.mydb = mysql.connector.connect(
-        host="localhost",
-        user="root",
-        passwd="",
-        buffered = True
+            host="localhost",
+            user="root",
+            passwd="",
+            buffered=True
         )
 
         self.mycursor = self.mydb.cursor()
         self.mycursor.execute("SHOW DATABASES")
         self.db_exists = False
-        
+
         for x in self.mycursor:
 
             if x[0] == 'Time_Table':
                 self.db_exists = True
-        
+
         if self.db_exists == False:
             self.mycursor.execute("CREATE DATABASE Time_Table")
 
-        
-            
-
     def database_table(self):
-        
+
         self.mycursor.execute("use Time_Table")
         self.mycursor.execute("show tables")
         self.table_exists = False
@@ -156,9 +169,9 @@ class Window(QtWidgets.QWidget):
         for a in self.mycursor:
             if a[0] == 'csv_check':
                 self.table_exists = True
-        
+
         if self.table_exists == False:
-          self.mycursor.execute("create table csv_check(row_value int,col_val int,init_sem_value int)")
+            self.mycursor.execute("create table csv_check(row_value int,col_val int,init_sem_value int)")
 
     def table_insert(self):
 
@@ -166,12 +179,10 @@ class Window(QtWidgets.QWidget):
         col_size = int(self.column_entry.text())
 
         sql = "INSERT INTO csv_check (row_value,col_val,init_sem_value) VALUES(%s,%s,%s)"
-        val =[row_size,col_size,1]
+        val = [row_size, col_size, 1]
         self.mycursor.execute(sql, val)
 
         self.mydb.commit()
-
-        
 
     def csv_write(self):
 
@@ -180,19 +191,16 @@ class Window(QtWidgets.QWidget):
         except AttributeError:
             self.file_end = 1
 
-            
-       
-        with open("/Users/srinivas/output_csv_{0}".format(self.file_end),"w") as csv_file:
+        with open("/Users/srinivas/output_csv_{0}".format(self.file_end), "w") as csv_file:
             writer = csv.writer(csv_file, delimiter=",")
-            for i in range(0,self.row_size):
-                for j in range(0,self.column_size):
-                    item = self.tableWidget.item(i,j)
-                    if(item == None):
+            for i in range(0, self.row_size):
+                for j in range(0, self.column_size):
+                    item = self.tableWidget.item(i, j)
+                    if (item == None):
                         writer.writerow(["NULL"])
                     else:
                         writer.writerow([item.text()])
 
-                   
     def csv_read(self):
 
         try:
@@ -205,87 +213,130 @@ class Window(QtWidgets.QWidget):
 
             with open('/Users/srinivas/output_csv_{0}'.format(self.file_end), newline='') as csv_file:
                 reader = csv.reader(csv_file, delimiter=',')
-                value =[]
+                value = []
                 for val in reader:
                     value.append(val)
-                for i in range(0,self.row_size):
-                    for j in range(0,self.column_size): 
-                      
+                for i in range(0, self.row_size):
+                    for j in range(0, self.column_size):
+
                         global count
                         if (next(iter(value[count])) == "NULL"):
                             self.tableWidget.setItem(i, j, QTableWidgetItem(""))
-                      
+
                         else:
                             gg = next(iter(value[count]))
                             self.tableWidget.setItem(i, j, QTableWidgetItem(gg))
 
-                        count+=1
-        
+                        count += 1
+
         else:
 
             self.initUI()
-        
 
-            
+    def cs(self):
+        condition = 1
+        while condition == 1:  # to avoid infinite loop
+            a = {"java": 3, "dbms": 3, "PC5": 2, "PP3": 2, "BM": 3, "BD": 3, "FLAT": 3, "LAB1": 2, "LAB2": 2, "MP": 2,
+                 "Free": 1, "Cult": 3, "PC3": 1, "PP1": 2, "CN": 3}
+            flag = 0
+
+            lab_check = 0
+            infi = 0
+
+            for sublist in range(5):  # 5 days in a week
+                while len(CS[sublist]) < 7:  # 7 hours in a day
+                    ch = random.choice(list(a.keys()))
+                    for j in CS[sublist]:  # make sure same subject doesn't repeat twice in a day
+                        if ch == j:
+                            flag = 1
+                    if flag == 0:
+                        if ch == 'LAB1' or ch == 'LAB2' or ch == 'MP' or ch == 'PP1' or ch == 'PP3':
+                            if len(CS[sublist]) == 0 or len(CS[sublist]) == 2 or len(CS[sublist]) == 4 or len(
+                                    CS[sublist]) == 5:  # 2 hour subjects shouldn't come in between breaks
+                                if lab_check == 0:  # make sure labs don't repeat in the same day
+                                    lab_check = 1
+                                    CS[sublist].append(ch)
+                                    CS[sublist].append(ch)
+                                    a[ch] = a[ch] - 2
+
+                        elif ch == 'Cult':
+                            if len(CS[sublist]) == 4:
+                                CS[sublist].append(ch)
+                                CS[sublist].append(ch)
+                                CS[sublist].append(ch)
+                                a[ch] = a[ch] - 3
+                                global cultsub
+                                cultsub = sublist
+                        else:
+                            CS[sublist].append(ch)
+                            a[ch] = a[ch] - 1
+                        if a[ch] == 0:
+                            del a[ch]
+                    flag = 0
+                    infi = infi + 1  # to break from infinite loop
+                    if infi > 100:
+                        break
+                lab_check = 0
+
+            if len(CS[4]) == 7:
+                condition = 0
+
+        return (CS)
 
     def rowcount(self):
 
         self.rowWindow = QtWidgets.QWidget()
-        
         self.resolution = QtWidgets.QDesktopWidget().screenGeometry()
         self.window_1_width = (self.resolution.width() / 2) - 150
         self.window_1_height = (self.resolution.height() / 2) - 50
 
-        self.rowWindow.setGeometry(self.window_1_width,self.window_1_height,310,100)
+        self.rowWindow.setGeometry(self.window_1_width, self.window_1_height, 310, 100)
 
         self.row_label = QtWidgets.QLabel(self.rowWindow)
         self.row_label.setText("Enter row size")
-        
+
         self.row_entry = QtWidgets.QLineEdit(self.rowWindow)
 
-        self.row_ok = QtWidgets.QPushButton("OK",self.rowWindow)
+        self.row_ok = QtWidgets.QPushButton("OK", self.rowWindow)
 
         self.row_ok.clicked.connect(self.row_ok_click)
 
-        self.row_ok.move(220,70)
-        self.row_label.move(25,35)
-        self.row_entry.move(130,32)
+        self.row_ok.move(220, 70)
+        self.row_label.move(25, 35)
+        self.row_entry.move(130, 32)
 
-        self.rowWindow.setFixedSize(310,100)
+        self.rowWindow.setFixedSize(310, 100)
 
         self.rowWindow.show()
 
-
-    
     def columncount(self):
-        
+
         self.columnWindow = QtWidgets.QWidget()
-        
+
         self.resolution = QtWidgets.QDesktopWidget().screenGeometry()
         self.window_2_width = (self.resolution.width() / 2) - 175
         self.window_2_height = (self.resolution.height() / 2) - 50
-        
-        self.columnWindow.setGeometry(self.window_2_width,self.window_2_height,350,100)
+
+        self.columnWindow.setGeometry(self.window_2_width, self.window_2_height, 350, 100)
 
         self.column_label = QtWidgets.QLabel(self.columnWindow)
         self.column_label.setText("Enter column size")
-        
+
         self.column_entry = QtWidgets.QLineEdit(self.columnWindow)
 
-        self.column_ok = QtWidgets.QPushButton("OK",self.columnWindow)
+        self.column_ok = QtWidgets.QPushButton("OK", self.columnWindow)
 
         self.column_ok.clicked.connect(self.column_ok_click)
 
-        self.column_ok.move(250,70)
-        self.column_label.move(25,35)
-        self.column_entry.move(150,32)
+        self.column_ok.move(250, 70)
+        self.column_label.move(25, 35)
+        self.column_entry.move(150, 32)
 
-        self.columnWindow.setFixedSize(350,100)
+        self.columnWindow.setFixedSize(350, 100)
 
         self.columnWindow.show()
 
         self.database_table()
-    
 
     def row_ok_click(self):
 
@@ -299,9 +350,161 @@ class Window(QtWidgets.QWidget):
 
         self.initUI()
         self.columnWindow.close()
-       
 
 
-app = QtWidgets.QApplication(sys.argv)
-window = Window()
-sys.exit(app.exec_())
+class MyWindow(QtWidgets.QMainWindow):
+
+    def __init__(self):
+        super(MyWindow, self).__init__()
+        
+        self.database_create()
+        self.database_table()
+
+        self.mycursor.execute("USE Time_Table")
+        self.mycursor.execute("SHOW TABLES")
+        tables = self.mycursor.fetchone()
+
+        if tables[0] == 'csv_check':
+
+            if table_check == False:
+                self.table_insert()
+                global table_check
+                table_check = True
+            else:
+                pass
+        print (table_check)
+
+        uic.loadUi('/Users/srinivas/Downloads/les/main.ui', self)
+        self.ok_button.clicked.connect(self.values)
+
+    def values(self):
+
+        self.no_of_Slots = self.Slots_day.toPlainText()
+        self.start = []
+        self.end = []
+        self.start.append(self.Start_1.toPlainText())
+        self.start.append(self.Start_2.toPlainText())
+        self.start.append(self.Start_3.toPlainText())
+        self.start.append(self.Start_4.toPlainText())
+        self.start.append(self.Start_5.toPlainText())
+        self.start.append(self.Start_6.toPlainText())
+        self.start.append(self.Start_7.toPlainText())
+        self.end.append(self.End_1.toPlainText())
+        self.end.append(self.End_2.toPlainText())
+        self.end.append(self.End_3.toPlainText())
+        self.end.append(self.End_4.toPlainText())
+        self.end.append(self.End_5.toPlainText())
+        self.end.append(self.End_6.toPlainText())
+        self.end.append(self.End_7.toPlainText())
+        self.breaks = []
+        self.breaks.append(self.break_1.toPlainText())
+        self.breaks.append(self.break_2.toPlainText())
+        self.days_week = self.days_week.toPlainText()
+        # print(self.no_of_Slots)
+        # print(self.start)
+        # print(self.end)
+        # print(self.breaks)
+        # print(self.days_week)
+        # print("\n")
+
+        uic.loadUi('/Users/srinivas/Downloads/les/lol.ui', self)
+
+        self.okbutton.clicked.connect(self.value_2)
+
+    def value_2(self):
+        self.teacher_numbers = self.Teacher_no.toPlainText()
+        self.subjects = []
+        self.time_req = []
+        self.subjects.append(self.subj_select_1.toPlainText())
+        self.subjects.append(self.subj_select_2.toPlainText())
+        self.subjects.append(self.subj_select_3.toPlainText())
+        self.subjects.append(self.subj_select_4.toPlainText())
+        self.subjects.append(self.subj_select_5.toPlainText())
+        self.subjects.append(self.subj_select_6.toPlainText())
+        self.subjects.append(self.subj_select_7.toPlainText())
+        self.time_req.append(self.Time_req_1.toPlainText())
+        self.time_req.append(self.Time_req_2.toPlainText())
+        self.time_req.append(self.Time_req_3.toPlainText())
+        self.time_req.append(self.Time_req_4.toPlainText())
+        self.time_req.append(self.Time_req_5.toPlainText())
+        self.time_req.append(self.Time_req_6.toPlainText())
+        self.time_req.append(self.Time_req_7.toPlainText())
+        self.batch_no = self.no_batch.toPlainText()
+        self.batch = self.batch_name.toPlainText()
+        self.semester_name = self.semester_value_1.toPlainText()
+        # print(self.teacher_numbers)
+        # print(self.subjects)
+        # print(self.time_req)
+        # print(self.batch_no)
+        # print(self.batch)
+        # print(self.semester_name)
+
+        self.okbutton.clicked.connect(self.check)
+
+    def check(self):
+
+        sql = "update csv_check set value_check = 1 where row_value = Null"
+        self.mycursor.execute(sql)
+        self.mydb.commit()
+
+
+    def database_create(self):
+
+        self.mydb = mysql.connector.connect(
+            host="localhost",
+            user="root",
+            passwd="",
+            buffered=True
+        )
+
+        self.mycursor = self.mydb.cursor()
+        self.mycursor.execute("SHOW DATABASES")
+        self.db_exists = False
+
+        for x in self.mycursor:
+
+            if x[0] == 'Time_Table':
+                self.db_exists = True
+
+        if self.db_exists == False:
+            self.mycursor.execute("CREATE DATABASE Time_Table")
+
+    def database_table(self):
+
+        self.mycursor.execute("use Time_Table")
+        self.mycursor.execute("show tables")
+        self.table_exists = False
+
+        for a in self.mycursor:
+            if a[0] == 'csv_check':
+                self.table_exists = True
+
+        if self.table_exists == False:
+            self.mycursor.execute("create table csv_check(row_value int,col_val int,init_sem_value int,value_check int)")
+
+    def table_insert(self):
+
+        sql = "INSERT INTO csv_check (value_check) VALUE(%s)"
+        val = [0]
+        self.mycursor.execute(sql, val)
+        self.mydb.commit()
+
+
+if __name__ == '__main__':
+    app = QtWidgets.QApplication(sys.argv)
+    window = MyWindow()
+
+    window.show()
+    sys.exit(app.exec_())
+
+# class MyWindow(QtWidgets.QMainWindow):
+#     def __init__(self):
+#         super(MyWindow,self).__init__()
+#         uic.loadUi('/Users/srinivas/Downloads/les/main.ui',self)
+
+# # if __name__ == '__main__':
+
+# app = QtWidgets.QApplication(sys.argv)
+# window = MyWindow()
+# # window = Window()
+# sys.exit(app.exec_())
