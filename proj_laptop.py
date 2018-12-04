@@ -120,19 +120,20 @@ class Window(QtWidgets.QWidget):
         self.save_button.clicked.connect(self.csv_write)
 
         gg = self.cs()
+        print(gg[0][1])
+        
 
-        # for i in range(0, self.row_size):
-        #     for j in range(0, self.column_size):
+        for i in range(0,1):
+            for j in range(0,7):
 
-        #         global count
-        #         if (next(iter(gg[i][j])) == "NULL"):
-        #             self.tableWidget.setItem(i, j, QTableWidgetItem(""))
+                global count
+      
+                ggs = gg[i][j]
+                self.tableWidget.setItem(i, j, QTableWidgetItem(ggs))
 
-        #         else:
-        #             ggs= next(iter(gg[i][j]))
-        #             self.tableWidget.setItem(i, j, QTableWidgetItem(gg))
+                count += 1
 
-        #         count += 1
+        
 
         self.mainWindow.show()
 
@@ -182,13 +183,6 @@ class Window(QtWidgets.QWidget):
         col_size = int(self.column_entry.text())
         
         self.mycursor.execute("update csv_check set row_value = %s, col_val = %s,init_sem_value = 1 where value_check = 1" % (row_size,col_size))
-
-        # cursor.execute ("UPDATE tblTableName SET Year=%s, Month=%s, Day=%s, Hour=%s, Minute=%s WHERE Server='%s' " % (Year, Month, Day, Hour, Minute, ServerID))
-
-        # sql = "INSERT INTO csv_check (row_value,col_val,init_sem_value) VALUES(%s,%s,%s)"
-        # val = [row_size, col_size, 1]
-
-        # self.mycursor.execute(sql)
 
         self.mydb.commit()
 
@@ -414,13 +408,7 @@ class MyWindow(QtWidgets.QMainWindow):
         self.breaks.append(self.break_1.toPlainText())
         self.breaks.append(self.break_2.toPlainText())
         self.days_week = self.days_week.toPlainText()
-        # print(self.no_of_Slots)
-        # print(self.start)
-        # print(self.end)
-        # print(self.breaks)
-        # print(self.days_week)
-        # print("\n")
-
+    
         uic.loadUi('/Users/srinivas/Downloads/les/lol.ui', self)
 
         self.okbutton.clicked.connect(self.value_2)
@@ -446,13 +434,7 @@ class MyWindow(QtWidgets.QMainWindow):
         self.batch_no = self.no_batch.toPlainText()
         self.batch = self.batch_name.toPlainText()
         self.semester_name = self.semester_value_1.toPlainText()
-        # print(self.teacher_numbers)
-        # print(self.subjects)
-        # print(self.time_req)
-        # print(self.batch_no)
-        # print(self.batch)
-        # print(self.semester_name)
-
+    
         self.okbutton.clicked.connect(self.check)
         
 
