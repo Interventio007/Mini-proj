@@ -30,11 +30,14 @@ class Window(QtWidgets.QWidget):
         self.mycursor.execute("USE Time_Table")
         self.mycursor.execute("SHOW TABLES")
         tables = self.mycursor.fetchone()
+        
+        self.mycursor.execute("select main_check from csv_check")
+        main_check_value = self.mycursor.fetchone() 
 
-        if tables == None:
+        if tables[0] == "csv_check" and main_check_value[0] == 0:
             self.rowcount()
 
-        else:
+        elif main_check_value[0] == 1:
             self.cs()
             self.initUI()
             self.csv_read()
@@ -177,10 +180,15 @@ class Window(QtWidgets.QWidget):
 
         row_size = int(self.row_entry.text())
         col_size = int(self.column_entry.text())
+        
+        self.mycursor.execute("update csv_check set row_value = %s, col_val = %s,init_sem_value = 1 where value_check = 1" % (row_size,col_size))
 
-        sql = "INSERT INTO csv_check (row_value,col_val,init_sem_value) VALUES(%s,%s,%s)"
-        val = [row_size, col_size, 1]
-        self.mycursor.execute(sql, val)
+        # cursor.execute ("UPDATE tblTableName SET Year=%s, Month=%s, Day=%s, Hour=%s, Minute=%s WHERE Server='%s' " % (Year, Month, Day, Hour, Minute, ServerID))
+
+        # sql = "INSERT INTO csv_check (row_value,col_val,init_sem_value) VALUES(%s,%s,%s)"
+        # val = [row_size, col_size, 1]
+
+        # self.mycursor.execute(sql)
 
         self.mydb.commit()
 
@@ -307,6 +315,9 @@ class Window(QtWidgets.QWidget):
 
         self.rowWindow.setFixedSize(310, 100)
 
+        self.mycursor.execute("update csv_check set main_check = 1 where main_check = 0")
+        self.mydb.commit()
+
         self.rowWindow.show()
 
     def columncount(self):
@@ -358,24 +369,27 @@ class MyWindow(QtWidgets.QMainWindow):
         super(MyWindow, self).__init__()
         
         self.database_create()
-        self.database_table()
 
         self.mycursor.execute("USE Time_Table")
         self.mycursor.execute("SHOW TABLES")
         tables = self.mycursor.fetchone()
 
-        if tables[0] == 'csv_check':
+        if tables == None:
+            pass
+       
+        else:
+            self.mycursor.execute("select value_check from csv_check")
+            self.checks = self.mycursor.fetchone()
 
-            if table_check == False:
-                self.table_insert()
-                global table_check
-                table_check = True
-            else:
-                pass
-        print (table_check)
-
-        uic.loadUi('/Users/srinivas/Downloads/les/main.ui', self)
-        self.ok_button.clicked.connect(self.values)
+            
+        if tables == None:
+            self.database_table()
+            self.table_insert()
+        
+        if self.checks[0] == 0 :
+            uic.loadUi('/Users/srinivas/Downloads/les/main.ui', self)
+            self.ok_button.clicked.connect(self.values)
+            
 
     def values(self):
 
@@ -440,12 +454,15 @@ class MyWindow(QtWidgets.QMainWindow):
         # print(self.semester_name)
 
         self.okbutton.clicked.connect(self.check)
+        
 
     def check(self):
 
-        sql = "update csv_check set value_check = 1 where row_value = Null"
+        sql = "update csv_check set value_check = 1 where value_check = 0"
         self.mycursor.execute(sql)
         self.mydb.commit()
+        self.checker()
+        
 
 
     def database_create(self):
@@ -480,31 +497,32 @@ class MyWindow(QtWidgets.QMainWindow):
                 self.table_exists = True
 
         if self.table_exists == False:
-            self.mycursor.execute("create table csv_check(row_value int,col_val int,init_sem_value int,value_check int)")
+            self.mycursor.execute("create table csv_check(row_value int,col_val int,init_sem_value int,value_check int,main_check int)")
 
     def table_insert(self):
 
-        sql = "INSERT INTO csv_check (value_check) VALUE(%s)"
-        val = [0]
+        sql = "INSERT INTO csv_check (value_check,main_check) VALUEs(%s,%s)"
+        val = [0,0]
         self.mycursor.execute(sql, val)
         self.mydb.commit()
+    
+    def checker(self):
+        sql = "select value_check from csv_check"
+        self.mycursor.execute(sql)
+        check = self.mycursor.fetchone()
+        return (check[0])
 
 
 if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)
     window = MyWindow()
+    window_check = window.checker()
+
+    if window_check == 1:
+        window_2 = Window()
+        window_2.show()
 
     window.show()
     sys.exit(app.exec_())
 
-# class MyWindow(QtWidgets.QMainWindow):
-#     def __init__(self):
-#         super(MyWindow,self).__init__()
-#         uic.loadUi('/Users/srinivas/Downloads/les/main.ui',self)
 
-# # if __name__ == '__main__':
-
-# app = QtWidgets.QApplication(sys.argv)
-# window = MyWindow()
-# # window = Window()
-# sys.exit(app.exec_())
