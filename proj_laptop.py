@@ -9,6 +9,7 @@ import mysql.connector
 import csv
 import itertools
 import os
+import os.path
 import random
 
 global count
@@ -80,8 +81,8 @@ class Window(QtWidgets.QWidget):
         self.tableWidget.verticalHeader().hide()
 
         self.resolution = QtWidgets.QDesktopWidget().screenGeometry()
-        self.width = (self.resolution.width() / 2) - 650
-        self.height = (self.resolution.height() / 2) - 250
+        self.width = (self.resolution.width() / 2) - 450
+        self.height = (self.resolution.height() / 2) - 125
 
         self.frame_size = self.mainWindow.frameGeometry()
 
@@ -109,7 +110,7 @@ class Window(QtWidgets.QWidget):
         self.tableWidget.setRowHeight(8, 50)
         self.tableWidget.setRowHeight(9, 50)
 
-        self.tableWidget.resize(1302, 502)
+        self.tableWidget.resize(927, 252)
 
         self.drp_box_lbl.move((self.frame_size.width() - 1525), (self.frame_size.height() - 800))
         self.drop_box.move((self.frame_size.width() - 1450), (self.frame_size.height() - 800))
@@ -120,18 +121,14 @@ class Window(QtWidgets.QWidget):
         self.save_button.clicked.connect(self.csv_write)
 
         gg = self.cs()
-        print(gg[0][1])
-        
-
-        for i in range(0,1):
-            for j in range(0,7):
-
-                global count
+    
+        for i in range(0,len(gg)):
+            for j in range(0,len(gg[0])):
       
                 ggs = gg[i][j]
                 self.tableWidget.setItem(i, j, QTableWidgetItem(ggs))
 
-                count += 1
+        
 
         
 
@@ -188,20 +185,12 @@ class Window(QtWidgets.QWidget):
 
     def csv_write(self):
 
-        try:
-            self.file_end = self.semester_value[-1]
-        except AttributeError:
-            self.file_end = 1
-
         with open("/Users/srinivas/output_csv_{0}".format(self.file_end), "w") as csv_file:
             writer = csv.writer(csv_file, delimiter=",")
             for i in range(0, self.row_size):
                 for j in range(0, self.column_size):
-                    item = self.tableWidget.item(i, j)
-                    if (item == None):
-                        writer.writerow(["NULL"])
-                    else:
-                        writer.writerow([item.text()])
+                    item = self.tableWidget.item(i, j)          
+                    writer.writerow([item.text()])
 
     def csv_read(self):
 
@@ -218,16 +207,13 @@ class Window(QtWidgets.QWidget):
                 value = []
                 for val in reader:
                     value.append(val)
+                print(value)
                 for i in range(0, self.row_size):
                     for j in range(0, self.column_size):
 
                         global count
-                        if (next(iter(value[count])) == "NULL"):
-                            self.tableWidget.setItem(i, j, QTableWidgetItem(""))
-
-                        else:
-                            gg = next(iter(value[count]))
-                            self.tableWidget.setItem(i, j, QTableWidgetItem(gg))
+                        gg = next(iter(value[count]))
+                        self.tableWidget.setItem(i, j, QTableWidgetItem(gg))
 
                         count += 1
 
@@ -379,10 +365,17 @@ class MyWindow(QtWidgets.QMainWindow):
         if tables == None:
             self.database_table()
             self.table_insert()
-        
-        if self.checks[0] == 0 :
             uic.loadUi('/Users/srinivas/Downloads/les/main.ui', self)
             self.ok_button.clicked.connect(self.values)
+            # self.ok_button.clicked.connect(self.value_2)
+         
+        # self.okbutton.clicked.connect(self.value_2)
+        # if self.checks[0] == 0:
+        #     uic.loadUi('/Users/srinivas/Downloads/les/main.ui', self)
+        #     self.ok_button.clicked.connect(self.values)
+        
+        # else:
+        #     pass
             
 
     def values(self):
@@ -408,12 +401,27 @@ class MyWindow(QtWidgets.QMainWindow):
         self.breaks.append(self.break_1.toPlainText())
         self.breaks.append(self.break_2.toPlainText())
         self.days_week = self.days_week.toPlainText()
+
+        # try:
+        #     self.file_end = self.semester_value[-1]
+        # except AttributeError:
+        #     self.file_end = 1
+
+        with open("/Users/srinivas/output_csv_time", "w") as csv_file:
+            writer = csv.writer(csv_file, delimiter=",")
+            for i in range(0, len(self.start)):
+                value_1 = self.start[i]
+                value_2 = self.end[i]
+                writer.writerow([value_1])
+                writer.writerow([value_2])
     
         uic.loadUi('/Users/srinivas/Downloads/les/lol.ui', self)
 
         self.okbutton.clicked.connect(self.value_2)
 
     def value_2(self):
+
+        
         self.teacher_numbers = self.Teacher_no.toPlainText()
         self.subjects = []
         self.time_req = []
@@ -434,8 +442,18 @@ class MyWindow(QtWidgets.QMainWindow):
         self.batch_no = self.no_batch.toPlainText()
         self.batch = self.batch_name.toPlainText()
         self.semester_name = self.semester_value_1.toPlainText()
+
+        with open("/Users/srinivas/output_csv_time", "w") as csv_file:
+            writer = csv.writer(csv_file, delimiter=",")
+            for i in range(0, len(self.subjects)):
+                value_1 = self.subjects[i]
+                value_2 = self.time_req[i]
+                writer.writerow([value_1])
+                writer.writerow([value_2])
     
         self.okbutton.clicked.connect(self.check)
+        
+        
         
 
     def check(self):
@@ -444,6 +462,7 @@ class MyWindow(QtWidgets.QMainWindow):
         self.mycursor.execute(sql)
         self.mydb.commit()
         self.checker()
+        self.close()
         
 
 
@@ -494,17 +513,67 @@ class MyWindow(QtWidgets.QMainWindow):
         check = self.mycursor.fetchone()
         return (check[0])
 
+class db_connect():
+    
+    def __init__(self):
+        pass
+
+    def database_create(self):
+
+        self.mydb = mysql.connector.connect(
+            host="localhost",
+            user="root",
+            passwd="",
+            buffered=True
+        )
+
+        self.mycursor = self.mydb.cursor()
+        self.mycursor.execute("SHOW DATABASES")
+        self.db_exists = False
+
+        for x in self.mycursor:
+
+            if x[0] == 'Time_Table':
+                self.db_exists = True
+
+        if self.db_exists:
+            return (0)
+        else:
+            return (1)
+        
+
+            
+    
+
+
 
 if __name__ == '__main__':
-    app = QtWidgets.QApplication(sys.argv)
-    window = MyWindow()
-    window_check = window.checker()
 
-    if window_check == 1:
+
+    app = QtWidgets.QApplication(sys.argv)
+
+    # window = MyWindow()
+    # window_check = window.checker()
+    # window.show()
+
+    checkss = db_connect()
+    vars = checkss.database_create()
+    window_check = ''
+
+    print (vars)
+    if vars == 1:
+        window = MyWindow()
+        window_check = window.checker()
+        window.show()
+    else:
+        pass
+
+ 
+    if vars == 0:
         window_2 = Window()
         window_2.show()
 
-    window.show()
+    
     sys.exit(app.exec_())
 
 
